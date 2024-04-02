@@ -39,6 +39,10 @@ class Task(BaseModel):
     agent: Optional[Agent] = Field(
         description="Agent responsible for execution the task.", default=None
     )
+    use_context: Optional[bool] = Field(
+        description="Whether the task should use context of previous task although not specifically set.",
+        default=True,
+    )
     context: Optional[List["Task"]] = Field(
         description="Other tasks that will have their output used as context for this task.",
         default=None,
@@ -136,7 +140,7 @@ class Task(BaseModel):
                 f"The task '{self.description}' has no agent assigned, therefore it can't be executed directly and should be executed in a Crew using a specific process that support that, like hierarchical."
             )
 
-        if self.context:
+        if self.context and self.use_context:
             context = []
             for task in self.context:
                 if task.async_execution:
@@ -163,6 +167,8 @@ class Task(BaseModel):
             return result
 
     def _execute(self, agent, task, context, tools):
+        if not self.use_context:
+            context = None
         result = agent.execute_task(
             task=task,
             context=context,
