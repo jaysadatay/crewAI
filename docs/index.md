@@ -79,8 +79,8 @@ Cutting-edge framework for orchestrating role-playing, autonomous AI agents. By 
                 </a>
             </li>
             <li>
-                <a href="./how-to/AgentOps-Observability.md">
-                    Agent Observability using AgentOps
+                <a href="./how-to/AgentOps-Observability">
+                    Agent Monitoring with AgentOps
                 </a>
             </li>
         </ul>
