@@ -121,8 +121,19 @@ class Agent(BaseModel):
     callbacks: Optional[List[InstanceOf[BaseCallbackHandler]]] = Field(
         default=None, description="Callback to be executed"
     )
+<<<<<<< HEAD
     stop: Optional[List[str]] = Field(
         default_factory=list, description="Sets the additional stop tokens to use."
+=======
+    system_template: Optional[str] = Field(
+        default=None, description="System format for the agent."
+    )
+    prompt_template: Optional[str] = Field(
+        default=None, description="Prompt format for the agent."
+    )
+    response_template: Optional[str] = Field(
+        default=None, description="Response format for the agent."
+>>>>>>> 1ccdd314d76041bc26770b340372073f5762c3f3
     )
 
     _original_role: str | None = None
@@ -170,7 +181,9 @@ class Agent(BaseModel):
                 self.llm.callbacks = []
 
             # Check if an instance of TokenCalcHandler already exists in the list
-            if not any(isinstance(handler, TokenCalcHandler) for handler in self.llm.callbacks):
+            if not any(
+                isinstance(handler, TokenCalcHandler) for handler in self.llm.callbacks
+            ):
                 self.llm.callbacks.append(token_handler)
 
         if not self.agent_executor:
@@ -299,7 +312,13 @@ class Agent(BaseModel):
                 "request_within_rpm_limit"
             ] = self._rpm_controller.check_or_wait
 
-        prompt = Prompts(i18n=self.i18n, tools=tools).task_execution()
+        prompt = Prompts(
+            i18n=self.i18n,
+            tools=tools,
+            system_template=self.system_template,
+            prompt_template=self.prompt_template,
+            response_template=self.response_template,
+        ).task_execution()
 
         execution_prompt = prompt.partial(
             goal=self.goal,
@@ -308,8 +327,16 @@ class Agent(BaseModel):
         )
 
         stop_words = [self.i18n.slice("observation")]
+<<<<<<< HEAD
         if self.stop:
             stop_words.extend(self.stop)
+=======
+        if self.response_template:
+            stop_words.append(
+                self.response_template.split("{{ .Response }}")[1].strip()
+            )
+
+>>>>>>> 1ccdd314d76041bc26770b340372073f5762c3f3
         bind = self.llm.bind(stop=stop_words)
         inner_agent = agent_args | execution_prompt | bind | CrewAgentParser(agent=self)
         self.agent_executor = CrewAgentExecutor(
