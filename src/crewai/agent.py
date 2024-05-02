@@ -121,6 +121,9 @@ class Agent(BaseModel):
     callbacks: Optional[List[InstanceOf[BaseCallbackHandler]]] = Field(
         default=None, description="Callback to be executed"
     )
+    stop: Optional[List[str]] = Field(
+        default_factory=list, description="Sets the additional stop tokens to use."
+    )
 
     _original_role: str | None = None
     _original_goal: str | None = None
@@ -304,7 +307,10 @@ class Agent(BaseModel):
             backstory=self.backstory,
         )
 
-        bind = self.llm.bind(stop=[self.i18n.slice("observation")])
+        stop_words = [self.i18n.slice("observation")]
+        if self.stop:
+            stop_words.extend(self.stop)
+        bind = self.llm.bind(stop=stop_words)
         inner_agent = agent_args | execution_prompt | bind | CrewAgentParser(agent=self)
         self.agent_executor = CrewAgentExecutor(
             agent=RunnableAgent(runnable=inner_agent), **executor_args
