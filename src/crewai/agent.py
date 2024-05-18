@@ -121,10 +121,11 @@ class Agent(BaseModel):
     callbacks: Optional[List[InstanceOf[BaseCallbackHandler]]] = Field(
         default=None, description="Callback to be executed"
     )
-<<<<<<< HEAD
+#<<<<<<< HEAD
     stop: Optional[List[str]] = Field(
         default_factory=list, description="Sets the additional stop tokens to use."
-=======
+    )
+#=======
     system_template: Optional[str] = Field(
         default=None, description="System format for the agent."
     )
@@ -133,8 +134,8 @@ class Agent(BaseModel):
     )
     response_template: Optional[str] = Field(
         default=None, description="Response format for the agent."
->>>>>>> 1ccdd314d76041bc26770b340372073f5762c3f3
     )
+#>>>>>>> 1ccdd314d76041bc26770b340372073f5762c3f3
 
     _original_role: str | None = None
     _original_goal: str | None = None
@@ -327,16 +328,16 @@ class Agent(BaseModel):
         )
 
         stop_words = [self.i18n.slice("observation")]
-<<<<<<< HEAD
+#<<<<<<< HEAD
         if self.stop:
             stop_words.extend(self.stop)
-=======
+#=======
         if self.response_template:
             stop_words.append(
                 self.response_template.split("{{ .Response }}")[1].strip()
             )
 
->>>>>>> 1ccdd314d76041bc26770b340372073f5762c3f3
+#>>>>>>> 1ccdd314d76041bc26770b340372073f5762c3f3
         bind = self.llm.bind(stop=stop_words)
         inner_agent = agent_args | execution_prompt | bind | CrewAgentParser(agent=self)
         self.agent_executor = CrewAgentExecutor(
