@@ -90,20 +90,18 @@ class Agent(BaseAgent):
     response_template: Optional[str] = Field(
         default=None, description="Response format for the agent."
     )
-<<<<<<< HEAD
-#>>>>>>> 1ccdd314d76041bc26770b340372073f5762c3f3
 
     _original_role: str | None = None
     _original_goal: str | None = None
     _original_backstory: str | None = None
-=======
+
     tools_results: Optional[List[Any]] = Field(
         default=[], description="Results of the tools used by the agent."
     )
     allow_code_execution: Optional[bool] = Field(
         default=False, description="Enable code execution for the agent."
     )
->>>>>>> upstream/main
+
 
     def __init__(__pydantic_self__, **data):
         config = data.pop("config", {})
@@ -277,13 +275,11 @@ class Agent(BaseAgent):
 
         stop_words = [self.i18n.slice("observation")]
 
->>>>>>> upstream/main
         if self.response_template:
             stop_words.append(
                 self.response_template.split("{{ .Response }}")[1].strip()
             )
 
-#>>>>>>> 1ccdd314d76041bc26770b340372073f5762c3f3
         bind = self.llm.bind(stop=stop_words)
 
         inner_agent = agent_args | execution_prompt | bind | CrewAgentParser(agent=self)

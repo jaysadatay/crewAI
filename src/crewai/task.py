@@ -201,7 +201,6 @@ class Task(BaseModel):
 
         if self.context:
             internal_context = []
->>>>>>> upstream/main
             for task in self.context:
                 if task.async_execution:
                     task.wait_for_completion()
@@ -228,7 +227,6 @@ class Task(BaseModel):
             return result
 
     def _execute(self, agent: "BaseAgent", task, context, tools) -> str | None:
->>>>>>> upstream/main
         result = agent.execute_task(
             task=task,
             context=context,
