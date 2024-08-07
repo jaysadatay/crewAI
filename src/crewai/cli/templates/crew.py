@@ -32,14 +32,12 @@ class {{crew_name}}Crew():
 	def research_task(self) -> Task:
 		return Task(
 			config=self.tasks_config['research_task'],
-			agent=self.researcher()
 		)
 
 	@task
 	def reporting_task(self) -> Task:
 		return Task(
 			config=self.tasks_config['reporting_task'],
-			agent=self.reporting_analyst(),
 			output_file='report.md'
 		)
 
@@ -50,6 +48,6 @@ class {{crew_name}}Crew():
 			agents=self.agents, # Automatically created by the @agent decorator
 			tasks=self.tasks, # Automatically created by the @task decorator
 			process=Process.sequential,
-			verbose=2,
+			verbose=True,
 			# process=Process.hierarchical, # In case you wanna use that instead https://docs.crewai.com/how-to/Hierarchical/
 		)

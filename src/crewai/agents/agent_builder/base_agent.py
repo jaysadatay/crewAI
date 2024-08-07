@@ -1,6 +1,7 @@
 import uuid
 from abc import ABC, abstractmethod
 from copy import copy as shallow_copy
+from hashlib import md5
 from typing import Any, Dict, List, Optional, TypeVar
 
 from pydantic import (
@@ -44,6 +45,7 @@ class BaseAgent(ABC, BaseModel):
         i18n (I18N): Internationalization settings.
         cache_handler (InstanceOf[CacheHandler]): An instance of the CacheHandler class.
         tools_handler (InstanceOf[ToolsHandler]): An instance of the ToolsHandler class.
+        max_tokens: Maximum number of tokens for the agent to generate in a response.
 
 
     Methods:
@@ -117,6 +119,9 @@ class BaseAgent(ABC, BaseModel):
     tools_handler: InstanceOf[ToolsHandler] = Field(
         default=None, description="An instance of the ToolsHandler class."
     )
+    max_tokens: Optional[int] = Field(
+        default=None, description="Maximum number of tokens for the agent's execution."
+    )
 
     _original_role: str | None = None
     _original_goal: str | None = None
@@ -153,7 +158,7 @@ class BaseAgent(ABC, BaseModel):
     @model_validator(mode="after")
     def set_private_attrs(self):
         """Set private attributes."""
-        self._logger = Logger(self.verbose)
+        self._logger = Logger(verbose=self.verbose)
         if self.max_rpm and not self._rpm_controller:
             self._rpm_controller = RPMController(
                 max_rpm=self.max_rpm, logger=self._logger
@@ -161,6 +166,11 @@ class BaseAgent(ABC, BaseModel):
         if not self._token_process:
             self._token_process = TokenProcess()
         return self
+
+    @property
+    def key(self):
+        source = [self.role, self.goal, self.backstory]
+        return md5("|".join(source).encode()).hexdigest()
 
     @abstractmethod
     def execute_task(
@@ -180,7 +190,7 @@ class BaseAgent(ABC, BaseModel):
         pass
 
     @abstractmethod
-    def get_delegation_tools(self, agents: List["BaseAgent"]):
+    def get_delegation_tools(self, agents: List["BaseAgent"]) -> List[Any]:
         """Set the task tools that init BaseAgenTools class."""
         pass
 
