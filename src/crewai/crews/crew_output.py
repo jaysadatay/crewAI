@@ -5,6 +5,7 @@ from pydantic import BaseModel, Field
 
 from crewai.tasks.output_format import OutputFormat
 from crewai.tasks.task_output import TaskOutput
+from crewai.types.usage_metrics import UsageMetrics
 
 
 class CrewOutput(BaseModel):
@@ -20,9 +21,7 @@ class CrewOutput(BaseModel):
     tasks_output: list[TaskOutput] = Field(
         description="Output of each task", default=[]
     )
-    token_usage: Dict[str, Any] = Field(
-        description="Processed token summary", default={}
-    )
+    token_usage: UsageMetrics = Field(description="Processed token summary", default={})
 
     @property
     def json(self) -> Optional[str]:
@@ -41,6 +40,14 @@ class CrewOutput(BaseModel):
         elif self.pydantic:
             output_dict.update(self.pydantic.model_dump())
         return output_dict
+
+    def __getitem__(self, key):
+        if self.pydantic and hasattr(self.pydantic, key):
+            return getattr(self.pydantic, key)
+        elif self.json_dict and key in self.json_dict:
+            return self.json_dict[key]
+        else:
+            raise KeyError(f"Key '{key}' not found in CrewOutput.")
 
     def __str__(self):
         if self.pydantic:
