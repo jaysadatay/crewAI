@@ -65,22 +65,9 @@ def cache_handler(func):
     return memoize(func)
 
 
-def stage(func):
-    func.is_stage = True
-    return memoize(func)
-
-
-def router(func):
-    func.is_router = True
-    return memoize(func)
-
-
-def pipeline(func):
-    func.is_pipeline = True
-    return memoize(func)
-
-
 def crew(func) -> Callable[..., Crew]:
+
+    @wraps(func)
     def wrapper(self, *args, **kwargs) -> Crew:
         instantiated_tasks = []
         instantiated_agents = []

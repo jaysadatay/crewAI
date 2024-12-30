@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List, Dict, Any, Optional
+from typing import Any, Dict, List, Optional
 
 import numpy as np
 from pydantic import BaseModel, ConfigDict, Field
@@ -16,12 +16,12 @@ class BaseKnowledgeSource(BaseModel, ABC):
     chunk_embeddings: List[np.ndarray] = Field(default_factory=list)
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
-    storage: KnowledgeStorage = Field(default_factory=KnowledgeStorage)
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    storage: Optional[KnowledgeStorage] = Field(default=None)
+    metadata: Dict[str, Any] = Field(default_factory=dict)  # Currently unused
     collection_name: Optional[str] = Field(default=None)
 
     @abstractmethod
-    def load_content(self) -> Dict[Any, str]:
+    def validate_content(self) -> Any:
         """Load and preprocess content from the source."""
         pass
 
@@ -41,9 +41,12 @@ class BaseKnowledgeSource(BaseModel, ABC):
             for i in range(0, len(text), self.chunk_size - self.chunk_overlap)
         ]
 
-    def save_documents(self, metadata: Dict[str, Any]):
+    def _save_documents(self):
         """
         Save the documents to the storage.
         This method should be called after the chunks and embeddings are generated.
         """
-        self.storage.save(self.chunks, metadata)
+        if self.storage:
+            self.storage.save(self.chunks)
+        else:
+            raise ValueError("No storage found to save documents.")
